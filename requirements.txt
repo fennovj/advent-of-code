@@ -1,5 +1,6 @@
-ipykernel
-ipywidgets
+ipykernel  # Required to use notebooks
 pandas
 numpy
-matplotlib
+ipywidgets  # Some sliders/etc
+matplotlib  # A few visualizations
+tqdm  # For long-running solutions
