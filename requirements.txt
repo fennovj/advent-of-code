@@ -4,3 +4,4 @@ numpy
 ipywidgets  # Some sliders/etc
 matplotlib  # A few visualizations
 tqdm  # For long-running solutions
+scipy  # ndimage.generic_filter!
