@@ -1,7 +1,7 @@
 ipykernel  # Required to use notebooks
 pandas
 numpy
-ipywidgets  # Some sliders/etc
+ipywidgets<8  # Some sliders/etc
 matplotlib  # A few visualizations
 tqdm  # For long-running solutions
 scipy  # ndimage.generic_filter!
