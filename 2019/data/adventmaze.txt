@@ -19,7 +19,7 @@ X.X.X...X...X...X.X...X...X.....X...X...X
 X.X.XXX.X.XXX.X.X.X.XXXXX.XXXXX.X.X.XXX.X
 X.....X.X...X.X.X...X.....X.....X.X.....X
 YXXXX.X.XXX.X.X.XXXXX.XXXXX.XXXXX.XXXXXXY
-X...X.X.X...X.X.....X.X...........X.....X
+X...X.X.X...X.X.....XsX...........X.....X
 X.XXX.X.XXXXX.XXXXX.XXX.XXXXXXXXXXXXX.X.X
 X.X...X.........X...X...X.............X.X
 X.X.XXXX?X?XXXXXX.XXX.XXXXXXXXX.X.XXXXXXY
