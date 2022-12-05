@@ -15,3 +15,7 @@ def get_char_grid(num, ext="csv"):
     with open(os.path.join(os.getcwd(), "data", "advent{}.{}".format(num, ext))) as f:
         data = f.read().splitlines()
     return np.array([[c for c in line] for line in data])
+
+def get_intcode(num, ext='txt'):
+    # reads input that is a single line of ints, e.g. "1,2,3"
+    return list(map(int, get_lines(num, ext)[0].split(',')))
