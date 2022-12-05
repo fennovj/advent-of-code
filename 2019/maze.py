@@ -1,57 +1,6 @@
 import advent
-import numpy as np
 import readchar
-import time
-
-pieces = {0: ' ', 1: '|', 2: 'X', 3: '-', 4: 'o'}
-
-automatic = 0.03
-
-class IO():
-    # Simple implementation of IO: just has static input in the __init__
-
-    def __init__(self, input_=None):
-        self.input_buffer = input_ if input_ is not None else []
-        self.output_buffer = []
-        self.grid = np.ones((20, 44)) # hard coded yeah!
-        self.score = 0
-    
-    def print(self):
-        output = [''.join(map(lambda x: pieces[x], line)) for line in self.grid] + [f"Score: {self.score}"]
-        print("\033c", end="") # clear terminal
-        print('\n'.join(output), flush=True)
-    
-    def handle_output(self):
-        for i in range(0, len(self.output_buffer), 3):
-            if self.output_buffer[i] == -1 or self.output_buffer[i+1] == -1:
-                self.score = self.output_buffer[i+2]
-            else:
-                self.grid[self.output_buffer[i+1],self.output_buffer[i]] = self.output_buffer[i+2]
-        self.output_buffer = []
-        return self
-
-    def read(self):
-        if len(self.input_buffer) > 0:
-            return self.input_buffer.pop(0)
-        self.handle_output()
-        self.print()
-        if automatic > 0:
-            paddle = np.where(self.grid == 3)[1][0]
-            ball = np.where(self.grid == 4)[1][0]
-            time.sleep(automatic)
-            return int(ball > paddle) - int(ball < paddle)
-        result = None
-        while result not in ['-1', '0', '1', 'a', 's', 'd']:
-            result = readchar.readkey()
-        if result in ['a', 's', 'd']: result = {'a': -1, 's': 0, 'd': 1}[result]
-        return int(result)
-    
-    def write(self, value):
-        self.output_buffer.append(value)
-        return self
-    
-    def output(self):
-        return self.output_buffer
+import numpy as np
 
 def put(code, op, pointer, relative, offset, value):
     mode = op % (10**(2+offset)) // (10**(1+offset))
@@ -123,6 +72,61 @@ def run(code, io):
         code, pointer, relative, io = step(code, pointer, relative, io)
     return code, io.output()
 
-code = advent.get_intcode(13)
-code[0] = 2 # insert coin
-_, out = run(code, IO([]))
+class IO():
+
+    pieces = {0: 'X', 1: '.', 2: '!', 3: 'o', 4: '?', 5: 's'}
+
+    def __init__(self):
+        self.output = 1
+        self.maze = {(0, 0): 1}
+        self.position = (0, 0)
+        self.direction = (0, 0)
+    
+    def print(self):
+        min_x = min(self.maze.keys(), key=lambda a: a[1])[1]
+        max_x = max(self.maze.keys(), key=lambda a: a[1])[1]
+        min_y = min(self.maze.keys(), key=lambda a: a[0])[0]
+        max_y = max(self.maze.keys(), key=lambda a: a[0])[0]
+        grid = np.ones((max_y-min_y+1, max_x-min_x+1)) * 4
+        for k in self.maze:
+            a, b = k
+            grid[a-min_y, b-min_x] = self.maze[k]
+        grid[self.position[0]-min_y, self.position[1]-min_x] = 3
+        grid[0-min_y, 0-min_x] = 5
+        output = [''.join(map(lambda x: self.pieces[x], line)) for line in grid]
+        print("\033c", end="") # clear terminal
+        print('\n'.join(output), flush=True)
+    
+    def handle_output(self):
+        # Position is the 'old' position
+        if self.output == 1: # empty spot
+            self.position = (self.position[0] + self.direction[0], self.position[1] + self.direction[1])
+            self.maze[self.position] = 1
+        elif self.output == 2:
+            self.position = (self.position[0] + self.direction[0], self.position[1] + self.direction[1])
+            self.maze[self.position] = 2
+        elif self.output == 0:
+            tmp_position = (self.position[0] + self.direction[0], self.position[1] + self.direction[1])
+            self.maze[tmp_position] = 0
+
+    def read(self):
+        self.handle_output()
+        self.print()
+        result = None
+        while result not in ['1', '2', '3', '4', 'w', 'a', 's', 'd']:
+            result = readchar.readkey()
+        if result in ['w', 'a', 's', 'd']: result = {'w': 1, 'a': 3, 's': 2, 'd': 4}[result]
+        self.direction = {1: (-1, 0), 2: (1, 0), 3: (0, -1), 4: (0, 1)}[int(result)]
+        return int(result)
+
+    def write(self, value):
+        self.output = value
+        return self
+
+    def output(self):
+        return self.maze
+
+data = advent.get_intcode(15)
+io = IO()
+
+_, out = run(data.copy(), io)
