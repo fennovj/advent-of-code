@@ -49,12 +49,9 @@ if __name__ == '__main__':
 
     io = IO()
     if len(sys.argv) > 3:
-        io.add_input(sys.argv[3].replace('\\n', '\n') + '\n')
+        io.add_input(sys.argv[3].replace('\\n', '\n').replace('->', '\n') + '\n')
     run(data.copy(), io)
     if len(io.output()) > 2: # The 2 is kinda random here. it is assumed that anything longer than that
         # is an exit message, anything shorter is a result
         io.handle_output()
     print(io.output()) # leftover need not be ascii
-
-# example input for 25, 1:
-# python intcode.py 25 1 'east\ntake loom\neast\ntake fixed point\nnorth\ntake spool of cat6\nnorth\ntake weather machine\nsouth\nwest\ntake shell\neast\nsouth\nwest\nsouth\ntake ornament\nwest\nnorth\ntake candy cane\nsouth\neast\nnorth\nwest\nnorth\ntake wreath\nnorth\neast'
