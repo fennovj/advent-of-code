@@ -41,7 +41,7 @@ if __name__ == '__main__':
     else:
         day, part = 25, 1
     # These are parts that are (interactive?) ascii-compute
-    CLR = day in [17] # only clear on day 17
+    CLR = False
 
     data = advent.get_intcode(day)
     if day == 17:
