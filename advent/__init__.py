@@ -11,10 +11,12 @@ def get_lines_doublenewline(num, ext='txt'):
         data = f.read().split("\n\n")
     return [c.splitlines() for c in data]
 
-def get_char_grid(num, ext="csv"):
+def get_char_grid(num, ext="csv", map_fn=None):
     with open(os.path.join(os.getcwd(), "data", "advent{}.{}".format(num, ext))) as f:
         data = f.read().splitlines()
-    return np.array([[c for c in line] for line in data])
+    data = [[c for c in line] for line in data]
+    if map_fn: data = [[map_fn(c) for c in line] for line in data]
+    return np.array(data)
 
 def get_intcode(num, ext='txt'):
     # reads input that is a single line of ints, e.g. "1,2,3"
