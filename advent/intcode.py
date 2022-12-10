@@ -61,9 +61,8 @@ def step(code, p, r, io):
         return code, -1, r, io
     raise ValueError(f"Incorrect program. Op is {op}")
 
-def run(code, io):
-    pointer = 0
-    relative = 0
-    while pointer >= 0:
+def run(code, io, pointer=0, relative=0, steps=-1):
+    while pointer >= 0 and steps != 0:
         code, pointer, relative, io = step(code, pointer, relative, io)
-    return code, io.output()
+        steps -= 1
+    return (code, pointer, relative), io.output()
