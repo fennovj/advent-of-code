@@ -1,6 +1,10 @@
 
 from tqdm.notebook import tqdm
 import heapq
+from typing import Callable
+
+# Generic
+class Node: ...
 
 def solve_maze_no_tqdm(start, is_target, adjacent, h=None):
     # This is more intented for 'small' mazes, and if you need to solve a maze
@@ -36,9 +40,14 @@ def solve_maze_no_tqdm(start, is_target, adjacent, h=None):
                 open_parents[adj] = current_node
     
     return sum(current_f), closed_parents, path_possible
-    
 
-def solve_maze(start, is_target, adjacent, h=None, total_nodes=1):
+
+def solve_maze(
+        start: Node,
+        is_target: Callable[[Node], bool],
+        adjacent: Callable[[Node], list[tuple[Node, int]]],
+        h: Callable[[Node], int]|None = None,
+        total_nodes: int = 1):
     # Given start and end nodes, and an adjacent function
     # as well as optional heuristic and total number of nodes,
     # Return shortest path, and for each node in that path, its parent
@@ -54,11 +63,13 @@ def solve_maze(start, is_target, adjacent, h=None, total_nodes=1):
     if h is None:
         h = lambda _: 0
 
-    closed = set([])
+    closed: set[Node] = set([])
     # open and f are related: if (g+h, _, n) in f, then open[n] = g+h
     open = {}
-    f = [(h(start), 0, start)] # [(g+h, g, n)]
-    open_parents, closed_parents = {start: None}, {}
+    f: list[tuple[int, int, Node]] = [(h(start), 0, start)] # [(g+h, g, n)]
+    open_parents: dict[Node, Node|None] = {start: None}
+    closed_parents: dict[Node, Node|None] = {}
+    current_f = h(start)
 
     progress=0
 
@@ -80,12 +91,12 @@ def solve_maze(start, is_target, adjacent, h=None, total_nodes=1):
                 if adj not in open or open[adj] > new_f:
                     heapq.heappush(f, (new_f, new_g, adj))
                     open[adj] = new_f
-                open_parents[adj] = current_node
+                    open_parents[adj] = current_node
             
             # Update progress bar
             progress_tmp = len(closed) / total_nodes
             if progress_tmp > progress:
-                pbar.update(progress_tmp - progress)
+                pbar.update(progress_tmp - progress)  # noqa
                 progress = progress_tmp
     
     return current_f, closed_parents
