@@ -1,4 +1,14 @@
-def put(code, op, pointer, relative, offset, value):
+from abc import ABC
+
+class BaseIO(ABC):
+    def read(self) -> int:
+        ...
+    def write(self, value: int) -> None:
+        ...
+    def output(self) -> list[int]:
+        ...
+
+def put(code: list[int], op: int, pointer: int, relative: int, offset: int, value: int) -> None:
     mode = op % (10**(2+offset)) // (10**(1+offset))
     if mode == 0: # parameter mode
         ix = code[pointer+offset]
@@ -10,7 +20,7 @@ def put(code, op, pointer, relative, offset, value):
         code += [0] * (ix - len(code) + 1)
     code[ix] = value
 
-def get(op, code, pointer, relative, offset):
+def get(op: int, code: list[int], pointer: int, relative: int, offset: int) -> int:
     # e.g. get(1002, code, 2) -> code[p] (immediate mode)
     # e.g. get(2, code, 2) -> code[code[p]] (parameter mode)
     mode = op % (10**(2+offset)) // (10**(1+offset))
@@ -27,7 +37,7 @@ def get(op, code, pointer, relative, offset):
         return code[relative+code[pointer+offset]]
     raise ValueError(f"{op}, {pointer}, {offset} not allowed")
 
-def step(code, p, r, io):
+def step(code: list[int], p: int, r: int, io: BaseIO) -> tuple[list[int], int, int, BaseIO]:
     # INPLACE does a intcode step, and returns new state and new p
     op = code[p]
     if op % 100 == 1: # add
@@ -40,7 +50,8 @@ def step(code, p, r, io):
         put(code, op, p, r, 1, io.read())
         return code, p+2, r, io
     elif op % 100 == 4: # write
-        return code, p+2, r, io.write(get(op, code, p, r, 1))
+        io.write(get(op, code, p, r, 1))
+        return code, p+2, r, io
     elif op % 100 == 5: # jmp_f
         if get(op, code, p, r, 1) != 0:
             return code, get(op, code, p, r, 2), r, io
@@ -61,7 +72,7 @@ def step(code, p, r, io):
         return code, -1, r, io
     raise ValueError(f"Incorrect program. Op is {op}")
 
-def run(code, io, pointer=0, relative=0, steps=-1):
+def run(code: list[int], io: BaseIO, pointer:int=0, relative:int=0, steps:int=-1):
     while pointer >= 0 and steps != 0:
         code, pointer, relative, io = step(code, pointer, relative, io)
         steps -= 1
