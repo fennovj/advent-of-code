@@ -17,13 +17,14 @@ def solve_maze_no_tqdm(start, is_target, adjacent, h=None):
         h = lambda _: 0
 
     closed = set([])
-    f = {start: (start, (0, h(start)))} # n: (n, (g, h))
-    open_parents, closed_parents = {start: None}, {}
+    open = {}
+    f: list[tuple[int, int, Node]] = [(h(start), 0, start)] # [(g+h, g, n)]
+    open_parents: dict[Node, Node|None] = {start: None}
+    closed_parents: dict[Node, Node|None] = {}
     path_possible = False
 
-    while len(f) > 0:
-        current_node, current_f = min(f.values(), key=lambda n: sum(n[1]))
-        del f[current_node]
+    while f:
+        current_f, current_g, current_node = heapq.heappop(f)
         closed.add(current_node)
         closed_parents[current_node] = open_parents[current_node]
         if is_target(current_node):
@@ -34,12 +35,13 @@ def solve_maze_no_tqdm(start, is_target, adjacent, h=None):
         for adj, adj_g in adjacent(current_node):
             if adj in closed:
                 continue
-            new_f = (current_f[0] + adj_g, h(adj))
-            if (adj not in f) or (sum(new_f) < sum(f[adj][1])):
-                f[adj] = (adj, new_f)
+            new_f, new_g = current_g + adj_g + h(adj), current_g + adj_g
+            if adj not in open or open[adj] > new_f:
+                heapq.heappush(f, (new_f, new_g, adj))
+                open[adj] = new_f
                 open_parents[adj] = current_node
-    
-    return sum(current_f), closed_parents, path_possible
+
+    return current_f, closed_parents, path_possible
 
 
 def solve_maze(
@@ -47,7 +49,8 @@ def solve_maze(
         is_target: Callable[[Node], bool],
         adjacent: Callable[[Node], list[tuple[Node, int]]],
         h: Callable[[Node], int]|None = None,
-        total_nodes: int = 1):
+        total_nodes: int = 1,
+        update_tqdm_every: int = 100):
     # Given start and end nodes, and an adjacent function
     # as well as optional heuristic and total number of nodes,
     # Return shortest path, and for each node in that path, its parent
@@ -71,13 +74,15 @@ def solve_maze(
     closed_parents: dict[Node, Node|None] = {}
     current_f = h(start)
 
-    progress=0
+    progress, update_tqdm = 0, 0
 
-    with tqdm(total=1) as pbar:
-
+    with tqdm(total=total_nodes) as pbar:
         while f:
             current_f, current_g, current_node = heapq.heappop(f)
             closed.add(current_node)
+            # Update tqdm progress bar
+            progress, update_tqdm = progress + 1, update_tqdm + 1
+            if (update_tqdm % update_tqdm_every) == 0: pbar.update(progress)
 
             closed_parents[current_node] = open_parents[current_node]
             if is_target(current_node):
@@ -92,11 +97,5 @@ def solve_maze(
                     heapq.heappush(f, (new_f, new_g, adj))
                     open[adj] = new_f
                     open_parents[adj] = current_node
-            
-            # Update progress bar
-            progress_tmp = len(closed) / total_nodes
-            if progress_tmp > progress:
-                pbar.update(progress_tmp - progress)  # noqa
-                progress = progress_tmp
     
     return current_f, closed_parents
