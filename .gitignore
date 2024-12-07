@@ -1,3 +1,6 @@
+# Session cookie, kinda secret
+session.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
