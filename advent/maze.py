@@ -1,12 +1,16 @@
 
 from tqdm.notebook import tqdm
 import heapq
-from typing import Callable
+from typing import Callable, Hashable, Optional, TypeVar
 
-# Generic
-class Node: ...
+Node = TypeVar('Node', bound=Hashable)
 
-def solve_maze_no_tqdm(start, is_target, adjacent, h=None):
+def solve_maze_no_tqdm(
+        start: Node,
+        is_target: Callable[[Node], bool],
+        adjacent: Callable[[Node], list[tuple[Node, int]]],
+        h: Callable[[Node], int] | None = None,
+):
     # This is more intented for 'small' mazes, and if you need to solve a maze
     # in a for-loop and not get dozens of progress bars
     # There is also a third output: path_possible, because there are usecases where
@@ -19,9 +23,10 @@ def solve_maze_no_tqdm(start, is_target, adjacent, h=None):
     closed = set([])
     open = {}
     f: list[tuple[int, int, Node]] = [(h(start), 0, start)] # [(g+h, g, n)]
-    open_parents: dict[Node, Node|None] = {start: None}
-    closed_parents: dict[Node, Node|None] = {}
+    open_parents: dict[Node, Optional[Node]] = {start: None}
+    closed_parents: dict[Node, Optional[Node]] = {}
     path_possible = False
+    current_f = h(start)
 
     while f:
         current_f, current_g, current_node = heapq.heappop(f)
@@ -48,7 +53,7 @@ def solve_maze(
         start: Node,
         is_target: Callable[[Node], bool],
         adjacent: Callable[[Node], list[tuple[Node, int]]],
-        h: Callable[[Node], int]|None = None,
+        h: Callable[[Node], int] | None = None,
         total_nodes: int = 1,
         update_tqdm_every: int = 100):
     # Given start and end nodes, and an adjacent function
@@ -60,7 +65,7 @@ def solve_maze(
     # COST MUST BE >= 0 !!!!
     # is_target function is a function that checks if a node is the target
     # If you have a constant target instead, use: lambda x: x == my_target
-    # Important: Node must be hashable. So e.g. tuple, not list
+    # Important: Node must be hashable. So e.g. tuple, not list. frozenset not set
 
     # By default, use Dijkstra
     if h is None:
@@ -70,8 +75,8 @@ def solve_maze(
     # open and f are related: if (g+h, _, n) in f, then open[n] = g+h
     open = {}
     f: list[tuple[int, int, Node]] = [(h(start), 0, start)] # [(g+h, g, n)]
-    open_parents: dict[Node, Node|None] = {start: None}
-    closed_parents: dict[Node, Node|None] = {}
+    open_parents: dict[Node, Optional[Node]] = {start: None}
+    closed_parents: dict[Node, Optional[Node]] = {}
     current_f = h(start)
 
     progress, update_tqdm = 0, 0
