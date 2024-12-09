@@ -4,7 +4,6 @@ import requests
 def scrape(year: int, day: int, extension: str = 'txt'):
     if os.path.exists(f"data/advent{day}.{extension}"):
         return # Prevent spamming
-    print(os.getcwd())
     with open('../session.txt', 'r') as f:
         session = f.read()
     if session.startswith('session='):
