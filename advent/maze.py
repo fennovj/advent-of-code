@@ -1,14 +1,14 @@
 
 from tqdm.notebook import tqdm
 import heapq
-from typing import Callable, Hashable, Optional, TypeVar
+from typing import Callable, Hashable, Optional, TypeVar, Iterable
 
 Node = TypeVar('Node', bound=Hashable)
 
 def solve_maze_no_tqdm(
         start: Node,
         is_target: Callable[[Node], bool],
-        adjacent: Callable[[Node], list[tuple[Node, int]]],
+        adjacent: Callable[[Node], Iterable[tuple[Node, int]]],
         h: Callable[[Node], int] | None = None,
 ):
     # This is more intented for 'small' mazes, and if you need to solve a maze
@@ -52,7 +52,7 @@ def solve_maze_no_tqdm(
 def solve_maze(
         start: Node,
         is_target: Callable[[Node], bool],
-        adjacent: Callable[[Node], list[tuple[Node, int]]],
+        adjacent: Callable[[Node], Iterable[tuple[Node, int]]],
         h: Callable[[Node], int] | None = None,
         total_nodes: int = 1,
         update_tqdm_every: int = 100):
