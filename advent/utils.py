@@ -7,3 +7,9 @@ def np_where_as_tuple(data, char):
 
 def tadd2(x: tuple[Any, Any], y: tuple[Any, Any]):
     return (x[0] + y[0], x[1] + y[1])
+
+def tsub2(x: tuple[Any, Any], y: tuple[Any, Any]):
+    return (x[0] - y[0], x[1] - y[1])
+
+def tmul2(c: Any, x: tuple[Any, Any]):
+    return (c * x[0], c * x[1])
