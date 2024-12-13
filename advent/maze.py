@@ -79,15 +79,17 @@ def solve_maze(
     closed_parents: dict[Node, Optional[Node]] = {}
     current_f = h(start)
 
-    progress, update_tqdm = 0, 0
+    progress = 0
 
     with tqdm(total=total_nodes) as pbar:
         while f:
             current_f, current_g, current_node = heapq.heappop(f)
             closed.add(current_node)
             # Update tqdm progress bar
-            progress, update_tqdm = progress + 1, update_tqdm + 1
-            if (update_tqdm % update_tqdm_every) == 0: pbar.update(progress)
+            progress += 1
+            if (progress % update_tqdm_every) == 0: pbar.update(progress)
+            # shortcut
+            if total_nodes > 1 and progress > total_nodes: return current_f, closed_parents
 
             closed_parents[current_node] = open_parents[current_node]
             if is_target(current_node):
